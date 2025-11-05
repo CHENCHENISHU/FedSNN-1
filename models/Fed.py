@@ -8,6 +8,7 @@ import random
 from torch import nn
 from typing import Union
 
+# 计算张量的百分位数
 def percentile(t: torch.tensor, q: float) -> Union[int, float]:
     """
     Return the ``q``-th percentile of the flattened input tensor's data.
@@ -44,7 +45,9 @@ class FedLearn(object):
     def __init__(self, args):
         self.args = args
 
+# w是客户端数量，w_init是初始模型参数
     def FedAvg(self, w, w_init = None):
+
         non_stragglers = [1]*len(w)
         for i in range(1, len(w)):
             epsilon = random.uniform(0, 1)
