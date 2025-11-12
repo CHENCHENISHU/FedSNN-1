@@ -45,14 +45,16 @@ class FedLearn(object):
     def __init__(self, args):
         self.args = args
 
-# w是客户端数量，w_init是初始模型参数
+# w是客户端数量，w_init是初始模型参数 联邦学习中的服务器端聚合函数。
     def FedAvg(self, w, w_init = None):
-
+        # 模拟没掉队者
         non_stragglers = [1]*len(w)
+
         for i in range(1, len(w)):
             epsilon = random.uniform(0, 1)
             if epsilon < self.args.straggler_prob:
                 non_stragglers[i] = 0
+
         w_avg = copy.deepcopy(w[0]) 
         for k in w_avg.keys():
             if w_init:
@@ -69,6 +71,23 @@ class FedLearn(object):
                         w_avg[k] = w_avg[k].cpu() + w[i][k].cpu() + torch.randn(w[i][k].size()) * self.args.grad_noise_stdev # Add gaussian noise to the model updates
             w_avg[k] = torch.div(w_avg[k], sum(non_stragglers))
         return w_avg
+
+    # w_init：初始全局模型参数
+    #
+    # delta_w_locals：各客户端的模型更新（本地模型 - 全局模型）
+    #
+    # th_basis：阈值计算基础 - "magnitude"（幅度）或
+    # "activity"（活动度）
+    #
+    # pruning_type：剪枝类型 - "uniform"（均匀）或
+    # "dynamic"（动态）
+    #
+    # sparsity：稀疏度（剪枝比例）
+    #
+    # activity：神经元活动度信息
+    #
+    # activity_mask：活动度掩码
+
 
     def FedAvgSparse(self, w_init, delta_w_locals, th_basis = "magnitude", pruning_type = "uniform", sparsity = 0, activity = None, activity_multiplier = 1, activity_mask = None):
         # th_basis -> on what basis the threshold is calculated - magnitude or activity
